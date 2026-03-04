@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createClient } from "redis";
-import { authMiddleware, type AuthRequest } from "../middleware/authmiddleware.js";
-import Task from "../models/Task.js";
+import { authMiddleware, type AuthRequest } from "../middleware/authmiddleware";
+import Task from "../models/Task";
 import { z } from "zod"
 import mongoose from "mongoose";
 
@@ -11,7 +11,9 @@ const redis = createClient({
     url: process.env.REDIS_URI as string
 })
 
-redis.connect()
+if(redis.connect){
+    redis.connect()
+}
 
 const createTaskSchema = z.object({
     title: z.string(),
