@@ -21,11 +21,38 @@ const createTaskSchema = z.object({
     duedate: z.string().optional()
 })
 
+const taskFilterSchema = z.object({
+    status: z.enum(["pending", "completed"]).optional(),
+    dueDate: z.string().optional()
+})
+
 router.get("/", authMiddleware, async (req: AuthRequest, res) => {
     if(!req.userId){
         return res.status(401).json({
             message: "Unauthorized"
         })
+    }
+
+    const parsed = taskFilterSchema.safeParse(req.query)
+
+    if(!parsed.success){
+        return res.status(400).json({
+            message: "Invalid query parameters"
+        })
+    }
+
+    const { status, dueDate } = parsed.data
+
+    const filter: any = {
+        owner: req.userId
+    }
+
+    if(status){
+        filter.status = status
+    }
+
+    if(dueDate){
+        filter.dueDate = new Date(dueDate)
     }
 
     const cacheKey = `task:${req.userId}`
